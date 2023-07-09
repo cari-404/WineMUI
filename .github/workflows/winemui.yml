@@ -35,6 +35,7 @@ jobs:
         sudo apt-get install -y build-essential libc6-dev-i386 gcc-multilib g++-multilib
         sudo apt install gcc-multilib gcc-mingw-w64 libasound2-dev libpulse-dev libdbus-1-dev libfontconfig-dev libfreetype-dev libgnutls28-dev libgl-dev libunwind-dev libx11-dev libxcomposite-dev libxcursor-dev libxfixes-dev libxi-dev libxrandr-dev libxrender-dev libxext-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libosmesa6-dev libsdl2-dev libudev-dev libvulkan-dev libcapi20-dev libcups2-dev libgphoto2-dev libsane-dev libkrb5-dev samba-dev ocl-icd-opencl-dev libpcap-dev libusb-1.0-0-dev
         sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev
+        sudo apt-get install -y libgcc-s1:i386 libstdc++6:i386 libc6:i386 libicu70:i386
         sudo apt-get install -y wine32-development-tools
         sudo apt-get install -y devscripts
         sudo apt-get install -y p7zip-full
