@@ -4,10 +4,10 @@ on:
   push:
     branches:
       - master
-	  
+
 # Define variables
 env:
-  WINE_VERSION: "8.3"
+  WINE_VERSION: "8.15"
 
 jobs:
   build_i386:
