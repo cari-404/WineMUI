@@ -43,8 +43,26 @@ jobs:
         sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev
         sudo apt-get install -y wine64-development-tools
         sudo apt-get install -y devscripts
-        sudo apt-get install -y p7zip-full libx11-dev:i386 libfreetype-dev:i386 libglu1-mesa-dev:i386 oss4-dev:i386 libjpeg-dev:i386 libgnutls-dev:i386 libxrender-dev:i386 libldap-dev:i386 libopenal-dev:i386 libudev-dev:i386  libmpg123-dev:i386 libxcursor-dev:i386 libxslt-dev:i386 libncurses5-dev:i386 libtiff-dev:i386 libgsm1-dev:i386 libv4l-dev:i386 libdbus-1-dev:i386 libosmesa6-dev:i386 libsane-dev:i386 libxinerama-dev:i386 libxrandr-dev:i386 libxxf86vm-dev:i386 liblcms2-dev:i386 libgphoto2:i386 libfontconfig1-dev:i386 libcapi20-dev:i386 libcups2-dev:i386 ocl-icd-opencl-dev:i386
+        sudo apt-get install -y p7zip-full libx11-dev:i386 libfreetype-dev:i386 libglu1-mesa-dev:i386 libjpeg-dev:i386 libxrender-dev:i386 libldap-dev:i386 libopenal-dev:i386 libudev-dev:i386  libmpg123-dev:i386 libxcursor-dev:i386 libxslt-dev:i386 libncurses5-dev:i386 libtiff-dev:i386 libgsm1-dev:i386 libv4l-dev:i386 libdbus-1-dev:i386 libosmesa6-dev:i386 libsane-dev:i386 libxinerama-dev:i386 libxrandr-dev:i386 libxxf86vm-dev:i386 liblcms2-dev:i386 libfontconfig1-dev:i386 libcapi20-dev:i386 libcups2-dev:i386 ocl-icd-opencl-dev:i386
 
     - name: Build WineHQ (i386)
       run: |
         ./configure
+        make
+        sudo make install
+
+    - name: Package build artifacts
+      run: |
+        7z a winehq-${{ env.WINE_VERSION }}_i386.7z *
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: winehq-${{ env.WINE_VERSION }}_i386.7z
+        path: winehq-${{ env.WINE_VERSION }}_i386.7z
+        
+    - name: Upload Kernelbase artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: KernelbaseMUI(x86)
+        path: dlls/kernelbase/
