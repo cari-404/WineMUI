@@ -77,7 +77,7 @@ jobs:
         asset_content_type: application/x-7z-compressed
 
   build_amd64:
-    name: Build WineHQ ${{ env.WINE_VERSION }} (amd64)
+    name: Build WineHQ (amd64)
     runs-on: ubuntu-22.04
     permissions:
       contents: write
@@ -104,7 +104,7 @@ jobs:
       run: |
         sudo apt-get update
 
-    - name: Build WineHQ ${{ env.WINE_VERSION }} (amd64)
+    - name: Build WineHQ (amd64)
       run: |
         ./configure --enable-win64
 
