@@ -63,24 +63,11 @@ jobs:
         name: winehq-${{ env.WINE_VERSION }}_i386.7z
         path: winehq-${{ env.WINE_VERSION }}_i386.7z
 
-    - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Pastikan Anda sudah menyediakan GitHub token
+    - name: Upload Kernelbase artifacts
+      uses: actions/upload-artifact@v3
       with:
-        tag_name: v${{ env.WINE_VERSION }}  # Menggunakan variabel RELEASE_VERSION
-        release_name: Release version ${{ env.WINE_VERSION }}  # Menggunakan variabel RELEASE_VERSION
-
-    - name: Upload Release Artifact
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Pastikan Anda sudah menyediakan GitHub token
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./kernelbase_i386.7z
-        asset_name: kernelbase_i386.7z  # Menggunakan variabel RELEASE_VERSION
-        asset_content_type: application/x-7z-compressed
+        name: KernelbaseMUI(i386)
+        path: dlls/kernelbase/
 
   build_amd64:
     name: Build WineHQ (amd64)
@@ -134,21 +121,55 @@ jobs:
         name: winehq-${{ env.WINE_VERSION }}_amd64.7z
         path: winehq-${{ env.WINE_VERSION }}_amd64.7z
         
+    - name: Upload Kernelbase artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: KernelbaseMUI(amd64)
+        path: dlls/kernelbase/
+
+  upload_to_release:
+    name: Upload to Release
+    needs: [build_i386, build_amd64]  # Menunggu kedua pekerjaan selesai
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+
+    steps:
+    - name: Download Artifact (i386)
+      uses: actions/download-artifact@v3
+      with:
+        name: KernelbaseMUI(i386)
+
+    - name: Download Artifact (amd64)
+      uses: actions/download-artifact@v3
+      with:
+        name: KernelbaseMUI(amd64)
+        
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Pastikan Anda sudah menyediakan GitHub token
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ env.WINE_VERSION }}  # Menggunakan variabel RELEASE_VERSION
-        release_name: Release version ${{ env.WINE_VERSION }}  # Menggunakan variabel RELEASE_VERSION
+        tag_name: v${{ env.WINE_VERSION }}
+        release_name: Release version ${{ env.WINE_VERSION }}
 
-    - name: Upload Release Artifact
+    - name: Upload Release Artifact (i386)
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Pastikan Anda sudah menyediakan GitHub token
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./kernelbase_amd64.7z
-        asset_name: kernelbase_amd64.7z  # Menggunakan variabel RELEASE_VERSION
-        asset_content_type: application/x-7z-compressed
+        asset_path: ./KernelbaseMUI(i386).zip
+        asset_name: KernelbaseMUI(i386).zip
+        asset_content_type: application/zip
+
+    - name: Upload Release Artifact (amd64)
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./KernelbaseMUI(amd64).zip
+        asset_name: KernelbaseMUI(amd64).zip
+        asset_content_type: application/zip
