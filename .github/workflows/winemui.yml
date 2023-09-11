@@ -66,7 +66,7 @@ jobs:
     - name: Upload Kernelbase artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: KernelbaseMUI(i386)
+        name: kernelbase_i386
         path: dlls/kernelbase/
 
   build_amd64:
@@ -124,7 +124,7 @@ jobs:
     - name: Upload Kernelbase artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: KernelbaseMUI(amd64)
+        name: kernelbase_amd64
         path: dlls/kernelbase/
 
   upload_to_release:
@@ -138,25 +138,25 @@ jobs:
     - name: Download Artifact (i386)
       uses: actions/download-artifact@v3
       with:
-        name: KernelbaseMUI(i386)
-        path: KernelbaseMUI(i386)
+        name: kernelbase_i386
+        path: kernelbase_i386
 
     - name: Download Artifact (amd64)
       uses: actions/download-artifact@v3
       with:
-        name: KernelbaseMUI(amd64)
-        path: KernelbaseMUI(amd64)
+        name: kernelbase_amd64
+        path: kernelbase_amd64
 
     - name: Display structure of downloaded files
       run: ls -R
 
     - name: Package build KernelBase artifacts
       run: |
-        7z a kernelbase_i386.7z KernelbaseMUI(i386)
+        7z a kernelbase_i386.7z kernelbase_i386
 
     - name: Package build KernelBase artifacts
       run: |
-        7z a kernelbase_amd64.7z KernelbaseMUI(amd64)
+        7z a kernelbase_amd64.7z kernelbase_amd64
 
     - name: Create GitHub Release
       id: create_release
