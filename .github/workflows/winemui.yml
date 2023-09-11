@@ -139,14 +139,24 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: KernelbaseMUI(i386)
+        path: KernelbaseMUI(i386)
 
     - name: Download Artifact (amd64)
       uses: actions/download-artifact@v3
       with:
         name: KernelbaseMUI(amd64)
+        path: KernelbaseMUI(amd64)
 
     - name: Display structure of downloaded files
       run: ls -R
+
+    - name: Package build KernelBase artifacts
+      run: |
+        7z a kernelbase_i386.7z KernelbaseMUI(i386)
+
+    - name: Package build KernelBase artifacts
+      run: |
+        7z a kernelbase_amd64.7z KernelbaseMUI(amd64)
 
     - name: Create GitHub Release
       id: create_release
@@ -163,9 +173,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./KernelbaseMUI(i386).zip
-        asset_name: KernelbaseMUI(i386).zip
-        asset_content_type: application/zip
+        asset_path: ./kernelbase_i386.7z
+        asset_name: kernelbase_i386.7z
+        asset_content_type: application/x-7z-compressed
 
     - name: Upload Release Artifact (amd64)
       uses: actions/upload-release-asset@v1
@@ -173,6 +183,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./KernelbaseMUI(amd64).zip
-        asset_name: KernelbaseMUI(amd64).zip
-        asset_content_type: application/zip
+        asset_path: ./kernelbase_amd64.7z
+        asset_name: kernelbase_amd64.7z
+        asset_content_type: application/x-7z-compressed
