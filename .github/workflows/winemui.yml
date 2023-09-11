@@ -48,6 +48,8 @@ jobs:
     - name: Build WineHQ (i386)
       run: |
         ./configure
+        make
+        sudo make install
 
     - name: Package build artifacts
       run: |
@@ -106,6 +108,8 @@ jobs:
     - name: Build WineHQ (amd64)
       run: |
         ./configure --enable-win64
+        make
+        sudo make install
 
     - name: Package build artifacts
       run: |
