@@ -144,7 +144,10 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: KernelbaseMUI(amd64)
-        
+
+    - name: Display structure of downloaded files
+      run: ls -R
+
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
