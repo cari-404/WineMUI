@@ -7,12 +7,12 @@ on:
 
 # Define variables
 env:
-  WINE_VERSION: "8.16"
+  WINE_VERSION: "10.0-rc3"
 
 jobs:
   build_i386:
     name: Build WineHQ (i386)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 
@@ -73,7 +73,7 @@ jobs:
 
   build_amd64:
     name: Build WineHQ (amd64)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 
