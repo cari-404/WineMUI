@@ -138,13 +138,13 @@ jobs:
 
     steps:
     - name: Download Artifact (i386)
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: kernelbase_i386
         path: kernelbase_i386
 
     - name: Download Artifact (amd64)
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: kernelbase_amd64
         path: kernelbase_amd64
