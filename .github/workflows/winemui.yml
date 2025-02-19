@@ -7,7 +7,7 @@ on:
 
 # Define variables
 env:
-  WINE_VERSION: "10.0"
+  WINE_VERSION: "10.1"
 
 jobs:
   build_i386:
