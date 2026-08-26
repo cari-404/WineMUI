@@ -1,190 +1,175 @@
-name: Build and Package WineHQ on Ubuntu 22.04 (i386 and amd64)
+name: Build and Package WineHQ WoW64 on Ubuntu
 
 on:
   push:
     branches:
       - master
 
-# Define variables
 env:
-  WINE_VERSION: "11.14"
+  WINE_VERSION: "11.16"
+  MAKE_JOBS: "8"
+
+permissions:
+  contents: read
 
 jobs:
-  build_i386:
-    name: Build WineHQ (i386)
+  build_wow64:
+    name: Build WineHQ WoW64 (x86_64 + i386)
     runs-on: ubuntu-latest
+
     permissions:
-      contents: write
+      contents: read
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v7
-      with:
-        ref: wine-${{ env.WINE_VERSION }}
-        repository: wine-mirror/wine
+      - name: Checkout Wine
+        uses: actions/checkout@v7
+        with:
+          repository: wine-mirror/wine
+          ref: wine-${{ env.WINE_VERSION }}
+          fetch-depth: 1
 
-    - name: Checkout the WineMUI code
-      uses: actions/checkout@v7
-      with:
-        ref: master
-        repository: cschuls/WineMUI
-        path: WineMUI
+      - name: Checkout WineMUI
+        uses: actions/checkout@v7
+        with:
+          repository: cschuls/WineMUI
+          ref: master
+          path: WineMUI
+          fetch-depth: 1
 
-    - name: Replace the file dll/kernelbase/loader.c
-      run: |
-        cp WineMUI/wine-devel/loader.c dlls/kernelbase/
+      - name: Patch kernelbase loader
+        shell: bash
+        run: |
+          cp WineMUI/wine-devel/loader.c dlls/kernelbase/loader.c
+          test -f dlls/kernelbase/loader.c
 
-    - name: Set up environment (i386)
-      run: |
-        sudo dpkg --add-architecture i386
-        sudo apt-get update
-        sudo apt-get install -y build-essential libc6-dev-i386 gcc-multilib g++-multilib
-        sudo apt install gcc-multilib gcc-mingw-w64 libasound2-dev libpulse-dev libdbus-1-dev libfontconfig-dev libfreetype-dev libgnutls28-dev libgl-dev libunwind-dev libx11-dev libxcomposite-dev libxcursor-dev libxfixes-dev libxi-dev libxrandr-dev libxrender-dev libxext-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libosmesa6-dev libsdl2-dev libudev-dev libvulkan-dev libcapi20-dev libcups2-dev libgphoto2-dev libsane-dev libkrb5-dev samba-dev ocl-icd-opencl-dev libpcap-dev libusb-1.0-0-dev
-        sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev
-        sudo apt-get install -y devscripts
-        sudo apt-get install -y p7zip-full libx11-dev:i386 libfreetype-dev:i386 libglu1-mesa-dev:i386 libjpeg-dev:i386 libxrender-dev:i386 libldap-dev:i386 libopenal-dev:i386 libudev-dev:i386  libmpg123-dev:i386 libxcursor-dev:i386 libxslt-dev:i386 libncurses5-dev:i386 libtiff-dev:i386 libgsm1-dev:i386 libv4l-dev:i386 libdbus-1-dev:i386 libosmesa6-dev:i386 libsane-dev:i386 libxinerama-dev:i386 libxrandr-dev:i386 libxxf86vm-dev:i386 liblcms2-dev:i386 libfontconfig1-dev:i386 libcapi20-dev:i386 libcups2-dev:i386 ocl-icd-opencl-dev:i386
+      - name: Enable i386 architecture
+        shell: bash
+        run: |
 
-    - name: Build WineHQ (i386)
-      run: |
-        ./configure
-        make -j 8
-        sudo make install
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
 
-    - name: Package build artifacts
-      run: |
-        7z a winehq-${{ env.WINE_VERSION }}_i386.7z *
+      - name: Install build dependencies
+        shell: bash
+        run: |
 
-    - name: Package build KernelBase artifacts
-      run: |
-        7z a kernelbase_i386.7z dlls/kernelbase/
+          sudo apt-get install -y build-essential gcc-multilib g++-multilib libc6-dev-i386 gcc-mingw-w64 pkg-config flex bison p7zip-full gettext autoconf automake libtool
+          sudo apt-get install -y libasound2-dev libpulse-dev libdbus-1-dev libfontconfig-dev libfreetype-dev libgnutls28-dev libgl-dev libunwind-dev libx11-dev libxcomposite-dev libxcursor-dev libxfixes-dev libxi-dev libxrandr-dev libxrender-dev libxext-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libosmesa6-dev libsdl2-dev libudev-dev libvulkan-dev libcapi20-dev libcups2-dev libgphoto2-dev libsane-dev libkrb5-dev samba-dev ocl-icd-opencl-dev libpcap-dev libusb-1.0-0-dev libgl1-mesa-dev libglu1-mesa-dev
+          sudo apt-get install -y libx11-dev:i386 libfreetype-dev:i386 libglu1-mesa-dev:i386 libjpeg-dev:i386 libxrender-dev:i386 libldap-dev:i386 libopenal-dev:i386 libudev-dev:i386 libmpg123-dev:i386 libxcursor-dev:i386 libxslt-dev:i386 libncurses-dev:i386 libtiff-dev:i386 libgsm1-dev:i386 libv4l-dev:i386 libdbus-1-dev:i386 libosmesa6-dev:i386 libsane-dev:i386 libxinerama-dev:i386 libxrandr-dev:i386 libxxf86vm-dev:i386 liblcms2-dev:i386 libfontconfig-dev:i386 libcapi20-dev:i386 libcups2-dev:i386 ocl-icd-opencl-dev:i386
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v7
-      with:
-        name: winehq-${{ env.WINE_VERSION }}_i386.7z
-        path: winehq-${{ env.WINE_VERSION }}_i386.7z
+      - name: Show toolchain
+        shell: bash
+        run: |
 
-    - name: Upload Kernelbase artifacts
-      uses: actions/upload-artifact@v7
-      with:
-        name: kernelbase_i386
-        path: dlls/kernelbase/
+          gcc --version
+          g++ --version
+          make --version
+          pkg-config --version
+          i686-w64-mingw32-gcc --version
+          x86_64-w64-mingw32-gcc --version
 
-  build_amd64:
-    name: Build WineHQ (amd64)
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
+      - name: Configure Wine WoW64
+        shell: bash
+        run: |
+          mkdir -p build
+          cd build
+          ../configure --enable-archs=x86_64,i386 --prefix="${GITHUB_WORKSPACE}/install"
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v7
-      with:
-        ref: wine-${{ env.WINE_VERSION }}
-        repository: wine-mirror/wine
+      - name: Build Wine WoW64
+        shell: bash
+        run: |
+          cd build
+          make -j"${MAKE_JOBS}"
 
-    - name: Checkout the WineMUI code
-      uses: actions/checkout@v7
-      with:
-        ref: master
-        repository: cschuls/WineMUI
-        path: WineMUI
+      - name: Run basic build checks
+        shell: bash
+        run: |
+          cd build
+          test -f wine
+          test -f wineapploader
+          test -f loader/wine
+          ./wine --version
 
-    - name: Replace the file dll/kernelbase/loader.c
-      run: |
-        cp WineMUI/wine-devel/loader.c dlls/kernelbase/
+      - name: Install Wine WoW64
+        shell: bash
+        run: |
+          cd build
+          make install
 
-    - name: Set up environment (amd64)
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential libc6-dev-i386 gcc-multilib g++-multilib
-        sudo apt install gcc-multilib gcc-mingw-w64 libasound2-dev libpulse-dev libdbus-1-dev libfontconfig-dev libfreetype-dev libgnutls28-dev libgl-dev libunwind-dev libx11-dev libxcomposite-dev libxcursor-dev libxfixes-dev libxi-dev libxrandr-dev libxrender-dev libxext-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libosmesa6-dev libsdl2-dev libudev-dev libvulkan-dev libcapi20-dev libcups2-dev libgphoto2-dev libsane-dev libkrb5-dev samba-dev ocl-icd-opencl-dev libpcap-dev libusb-1.0-0-dev
-        sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev
-        sudo apt-get install -y devscripts
-        sudo apt-get install -y p7zip-full
+      - name: Prepare Wine package
+        shell: bash
+        run: |
+          mkdir -p package/winehq-${WINE_VERSION}_wow64
+          cp -a install/. package/winehq-${WINE_VERSION}_wow64/
 
-    - name: Build WineHQ (amd64)
-      run: |
-        ./configure --enable-win64
-        make -j 8
-        sudo make install
+      - name: Package Wine WoW64
+        shell: bash
+        run: |
+          cd package
+          7z a "${GITHUB_WORKSPACE}/winehq-${WINE_VERSION}_wow64-amd64.7z" "winehq-${WINE_VERSION}_wow64"
 
-    - name: Package build artifacts
-      run: |
-        7z a winehq-${{ env.WINE_VERSION }}_amd64.7z *
+      - name: Package KernelBase
+        shell: bash
+        run: |
 
-    - name: Package build KernelBase artifacts
-      run: |
-        7z a kernelbase_amd64.7z dlls/kernelbase/
+          7z a "${GITHUB_WORKSPACE}/kernelbase_wow64.7z" dlls/kernelbase
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v7
-      with:
-        name: winehq-${{ env.WINE_VERSION }}_amd64.7z
-        path: winehq-${{ env.WINE_VERSION }}_amd64.7z
-        
-    - name: Upload Kernelbase artifacts
-      uses: actions/upload-artifact@v7
-      with:
-        name: kernelbase_amd64
-        path: dlls/kernelbase/
+      - name: Upload Wine WoW64 artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: winehq-${{ env.WINE_VERSION }}_wow64-amd64
+          path: winehq-${{ env.WINE_VERSION }}_wow64-amd64.7z
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Upload KernelBase artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: kernelbase_wow64
+          path: kernelbase_wow64.7z
+          if-no-files-found: error
+          compression-level: 0
 
   upload_to_release:
-    name: Upload to Release
-    needs: [build_i386, build_amd64]  # Menunggu kedua pekerjaan selesai
+    name: Upload WoW64 build to Release
+    needs:
+      - build_wow64
     runs-on: ubuntu-latest
+
     permissions:
       contents: write
+      actions: read
 
     steps:
-    - name: Download Artifact (i386)
-      uses: actions/download-artifact@v8
-      with:
-        name: kernelbase_i386
-        path: kernelbase_i386
+      - name: Download Wine WoW64
+        uses: actions/download-artifact@v8
+        with:
+          name: winehq-${{ env.WINE_VERSION }}_wow64-amd64
+          path: release-assets
 
-    - name: Download Artifact (amd64)
-      uses: actions/download-artifact@v8
-      with:
-        name: kernelbase_amd64
-        path: kernelbase_amd64
+      - name: Download KernelBase
+        uses: actions/download-artifact@v8
+        with:
+          name: kernelbase_wow64
+          path: release-assets
 
-    - name: Display structure of downloaded files
-      run: ls -R
+      - name: Show release assets
+        shell: bash
+        run: |
 
-    - name: Package build KernelBase artifacts
-      run: |
-        7z a kernelbase_i386.7z kernelbase_i386
+          find release-assets -type f -print
+          test -f "release-assets/winehq-${WINE_VERSION}_wow64-amd64.7z"
+          test -f "release-assets/kernelbase_wow64.7z"
 
-    - name: Package build KernelBase artifacts
-      run: |
-        7z a kernelbase_amd64.7z kernelbase_amd64
-
-    - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ env.WINE_VERSION }}
-        release_name: Release version ${{ env.WINE_VERSION }}
-
-    - name: Upload Release Artifact (i386)
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./kernelbase_i386.7z
-        asset_name: kernelbase_i386.7z
-        asset_content_type: application/x-7z-compressed
-
-    - name: Upload Release Artifact (amd64)
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./kernelbase_amd64.7z
-        asset_name: kernelbase_amd64.7z
-        asset_content_type: application/x-7z-compressed
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ env.WINE_VERSION }}
+          name: Wine ${{ env.WINE_VERSION }}
+          files: |
+            release-assets/winehq-${{ env.WINE_VERSION }}_wow64-amd64.7z
+            release-assets/kernelbase_wow64.7z
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
