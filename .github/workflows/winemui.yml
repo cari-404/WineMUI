@@ -92,8 +92,7 @@ jobs:
       - name: Package KernelBase
         shell: bash
         run: |
-
-          7z a "${GITHUB_WORKSPACE}/kernelbase_wow64.7z" dlls/kernelbase
+          7z a "${GITHUB_WORKSPACE}/kernelbase_wow64.7z" dlls/kernelbase build/dlls/kernelbase
 
       - name: Upload Wine WoW64 artifact
         uses: actions/upload-artifact@v7
