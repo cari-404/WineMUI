@@ -8,7 +8,7 @@ on:
 
 # Define variables
 env:
-  WINE_VERSION: "11.16"
+  WINE_VERSION: "11.19"
   MAKE_JOBS: "8"
 
 jobs:
